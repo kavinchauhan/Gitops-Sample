@@ -1,0 +1,27 @@
+name: GitOps Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Git repository
+        uses: actions/checkout@v2
+      
+      - name: Install Argo CD CLI
+        run: |
+          curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+          chmod +x /usr/local/bin/argocd
+      
+      - name: Login to Argo CD
+        run: |
+          argocd login --username ${{ secrets.ARGO_CD_USERNAME }} --password ${{ secrets.ARGO_CD_PASSWORD }} --insecure ${{ secrets.ARGO_CD_SERVER }}
+      
+      - name: Sync Application with Argo CD
+        run: |
+          argocd app sync hello-world --prune
